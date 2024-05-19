@@ -1,8 +1,41 @@
 #include "player.h"
+#include "gameinfo.h"
+#include <iostream>
 
-int player::wheel[24] = {650, 1000, 750, 0, 500, 650, 950, 700, 1500, 0, 2000, 900, 500, 700, 650, 800, 550, 1250, 850, 600, 2500, 500, 900, 0};
+
 
 player::player() {
     name = "";
-    bank = 1000;
+    bank = 500;
+    isCPU = false;
+}
+
+// bool player::getIsCPU() {
+
+//     return isCPU;
+// }
+
+
+bool player::spinWheel() {
+
+
+
+}
+
+// guessed letter is added to the used letter board in this function
+char player::chooseLetter() {
+
+    char guess;
+    if (isCPU) {
+        //radnomly choose letter that's not in usedletterboard
+    } else {
+
+        std::cout << "Guess a letter! If you want to solve, enter the '!' symbol: ";
+        std::cin >> guess;
+        guess = toupper(guess);
+
+    }
+
+    gameinfo::usedLettersBoard.push_back(guess);
+    return guess;
 }

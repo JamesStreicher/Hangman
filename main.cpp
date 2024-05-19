@@ -1,18 +1,20 @@
 #include "player.h"
-#include "wheel.h"
+#include "gameinfo.h"
+#include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
 #include <random>
 //#include <algorithm>
 
+// idea: to make this more space efficient, could just store a vector<int> where its index represents the category and the number at index is total number of puzzles in that category. (still randomly choose 2 ints to get category/puzzle)
+// so instead of creating 2d vector of strings, we just pull the category and puzzle straight from the txt file every time
+
 int main() {
 
     player p1;
 
-    //this is a change
-
-    std::cout << player::wheel[1] << '\n';
+    std::cout << gameinfo::wheel[1] << '\n';
 
 
     srand(time(NULL));
@@ -42,6 +44,7 @@ int main() {
 
 
     // randomly choose category then puzzle from category
+    // This gives each category the same chance to be chosen, regardless of how many values are in that category
     int chooseCat1 = rand() % categories.size();
     int chooseCat2 = (rand() % (*categories[chooseCat1]).size()) + 1;
     std::string Cat = (*categories[chooseCat1])[0];
