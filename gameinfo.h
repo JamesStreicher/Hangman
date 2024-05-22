@@ -6,21 +6,26 @@ class gameinfo{
 
     public:
 
-    static const int wheel[24];
-    static std::vector<char> usedLettersBoard;
-    std::vector<std::vector<std::string>*> categories;
-    std::string puzzle;
+    static int wheel[24];
+    static std::vecotr<std::string> catsAndPuzzles; // should have been two string member data where they get updated each round
+    static std::vector<char> usedLetterBoard;
+    static std::string clue;
+    static int round;
+    static const int startingPlayer;
+    static int selectedCategories[3];
 
 
     gameinfo();
 
-    void setPuzzle();
+    std::vector<int> generatePuzzlePartitions(std::ifstream file());
 
-    std::string getClue();
+    void generateCategoriesAndPuzzles(); 
+
+    void setPuzzle();
 
     std::string stringUsedLettersBoard();
 
-    const void setWheel();
+    void setWheel() const;
 
 
 
