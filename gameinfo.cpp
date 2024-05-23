@@ -5,9 +5,11 @@
 #include <vector>
 #include <random>
 
-const int gameinfo::wheel[24] = {650, 1000, 750, -1, 500, 650, 950, 700, 1500, 0, 2000, 900, 500, 700, 650, 800, 550, 1250, 850, 600, 2500, 500, 900, -1};
+int gameinfo::wheel[24] = {650, 1000, 750, -1, 500, 650, 950, 700, 1500, 0, 2000, 900, 500, 700, 650, 800, 550, 1250, 850, 600, 2500, 500, 900, -1};
+int gameinfo::selectedCategories[3] = {-1, -1, -1};
 
 gameinfo::gameinfo() {
+
 
  //    std::ifstream file1("DownloadedPuzzles.txt");
 
@@ -32,7 +34,7 @@ gameinfo::gameinfo() {
 	// }
 }
 
-#define NUM_ROUNDS = 4;
+#define NUM_ROUNDS 4
 
     //srand(time(NULL));
 
@@ -48,14 +50,16 @@ gameinfo::gameinfo() {
 
     
     // need to have generated the PartitionsPuzzles int vector, which counts how many reglar puzzles and bonus puzzles there are in each category
-std::vector<int> gameinfo::generatePuzzlePartitions(std::ifstream file()) {
+std::vector<int> gameinfo::generatePuzzlePartitions(/*std::ifstream file()*/) {
 
     int position = -1;
     int counter = 0;
     std::string line;
     std::vector<int> partitions;
 
-    while(getline(puzzles, line)) {
+    std::ifstream file("DownloadesPuzzles.txt");
+
+    while(getline(file, line)) {
 
         if (line[0] == '[' || line[0] == '(') { position++; }
         if (line[0] != '[' && line[0] != '(' && line[0] != '=') { counter++; }
@@ -69,74 +73,152 @@ std::vector<int> gameinfo::generatePuzzlePartitions(std::ifstream file()) {
 }
 
 
-void gameinfo::generateCategoriesAndPuzzles() {
+void gameinfo::setCategoryAndPuzzle() {
 
-    std::vector<int> PuzzlesPartions = generatePuzzlePartitions(file("DownloadPuzzles.txt"));
-
+    std::vector<int> PuzzlesPartitions = generatePuzzlePartitions(/*std::ifstream file("DownloadedPuzzles.txt")*/);
     int chooseCategory;
     int choosePuzzle;
-    std::ifstream file1("DownloadedPuzzles.txt");
+    std::ifstream file("DownloadedPuzzles.txt");
+    std::string line;
+    int counter = 0;
 
-    for (int i = 0; i < NUM_ROUNDS; i++) {
-        
-        chooseCategory = (rand() % (PuzzlesPartitions.size() / 2)) * 2;             //pick a category
-
-        // loop to see that the category hasn't already been picked
-        for (int j = 0; j < 3; j++) {
-            if (chooseCategory == selectedCategories[j]) {
-                chooseCategory = (rand() % (PuzzlesPartitions.size() / 2)) * 2;
-                // new category has been chosen, now need to start for loop over from beginning to check that this new one hasn't been picked before
-                j = -1; // is this how?
-            }
-        }
-
-        // now that the category is unique to game, record that category as selected
-        selectedCategories[i] = chooseCategory; 
-
-        if (i == NUM_ROUNDS) {
-            choosePuzzle = rand() % PuzzlesPartions[chooseCategory + 1];
-        } else {
-            choosePuzzle = rand() % PuzzlesPartions[chooseCategory];
-        }
-        int whichLine = -1;  // will be num of lines to go down in DownloadedPuzzles.txt to get to category that we've chosen
-
-        for (int k = 0; k < chooseCategory; k++) {
-            whichLine += PuzzlesPartitions[k];
-            if (k % 2 == 0) { whichLine += 3; }
-        }
-
-        // now go whichLine many lines down in text file and should be at category that we want
-        std::string line;
-
-        for (int i = 0; i < whichLine; i++) {
-            while (getline(file1, line)) {}
-        }
-
-        // line.substr(1, line.size()-3) now hopefully holds the category that we want
-        categoriesAndPuzzles.push_back(line.substr(1, line.size()-3));
-
-        int counter = 0;
-
-        //filling all vector<strings> with puzzles
-        while (getline(file1, line)) {
-
-            if (line[0] != '[') {
-                counter++;
-                if (i < NUM_ROUNDS) {
-                    if (counter) == choosePuzzle { 
-                        categoriesAndPuzzles.push_back(line.substr(0, line.size()-1));
-                        break;
-                    }
-                } else {
-                    if (counter == choosePuzzle + PuzzlesPartions[chooseCategory] + 1) {
-                        categoriesAndPuzzles.push_back(line.substr(0, line.size()-1));
-                        break;
-                    }
-                }
-            }      
+    chooseCategory = (rand() % (PuzzlesPartitions.size() / 2)) * 2;
+    for (int j = 0; j < 3; j++) {
+        if (chooseCategory == selectedCategories[j]) {
+            chooseCategory = (rand() % (PuzzlesPartitions.size() / 2)) * 2;
+            // new category has been chosen, now need to start for loop over from beginning to check that this new one hasn't been picked before
+            j = -1; // is this how?
         }
     }
+    // now that the category is unique to game, record that category as selected
+    selectedCategories[round - 1] = chooseCategory; 
+
+    // choose puzzle from category
+    if (round == NUM_ROUNDS) {
+        choosePuzzle = rand() % PuzzlesPartitions[chooseCategory + 1];
+    } else {
+        choosePuzzle = rand() % PuzzlesPartitions[chooseCategory];
+    }
+    
+    int whichLine = -1;  // will be num of lines to go down in DownloadedPuzzles.txt to get to category that we've chosen
+
+    for (int k = 0; k < chooseCategory; k++) {
+        whichLine += PuzzlesPartitions[k];
+        if (k % 2 == 0) { whichLine += 3; }
+    }
+
+    for (int i = 0; i < whichLine; i++) {
+        while (getline(file, line)) {}
+    }
+
+    // line.substr(1, line.size()-3) now hopefully holds the category that we want
+    m_category = line.substr(1, line.size()-3);
+
+
+    while(getline(file, line)) {
+
+        if (line[0] != '[') {
+            counter++;
+            if (round < NUM_ROUNDS) {
+                if (counter == choosePuzzle) { 
+                    m_puzzle = line.substr(0, line.size()-1);
+                    break;
+                }
+            } else {
+                if (counter == choosePuzzle + PuzzlesPartitions[chooseCategory] + 1) {
+                    m_puzzle = line.substr(0, line.size()-1);
+                    break;
+                }
+            }
+        }     
+    }
 }
+
+void gameinfo::setClue() {
+
+    for (int i = 0; i < m_puzzle.size(); i++) {
+        if (m_puzzle[i] >= 65 && m_puzzle[i] <= 90) {
+            m_clue += '_';
+        } else {
+            m_clue += m_puzzle[i];
+        }    
+    }
+
+}
+
+
+
+
+
+
+// void gameinfo::generateCategoriesAndPuzzles() {
+
+//     std::vector<int> PuzzlesPartitions = generatePuzzlePartitions(/*std::ifstream file("DownloadedPuzzles.txt")*/);
+
+//     int chooseCategory;
+//     int choosePuzzle;
+//     std::ifstream file1("DownloadedPuzzles.txt");
+
+//     for (int i = 0; i < NUM_ROUNDS; i++) {
+        
+//         chooseCategory = (rand() % (PuzzlesPartitions.size() / 2)) * 2;             //pick a category
+
+//         // loop to see that the category hasn't already been picked
+//         for (int j = 0; j < 3; j++) {
+//             if (chooseCategory == selectedCategories[j]) {
+//                 chooseCategory = (rand() % (PuzzlesPartitions.size() / 2)) * 2;
+//                 // new category has been chosen, now need to start for loop over from beginning to check that this new one hasn't been picked before
+//                 j = -1; // is this how?
+//             }
+//         }
+
+//         // now that the category is unique to game, record that category as selected
+//         selectedCategories[i] = chooseCategory; 
+
+//         if (i == NUM_ROUNDS) {
+//             choosePuzzle = rand() % PuzzlesPartitions[chooseCategory + 1];
+//         } else {
+//             choosePuzzle = rand() % PuzzlesPartitions[chooseCategory];
+//         }
+//         int whichLine = -1;  // will be num of lines to go down in DownloadedPuzzles.txt to get to category that we've chosen
+
+//         for (int k = 0; k < chooseCategory; k++) {
+//             whichLine += PuzzlesPartitions[k];
+//             if (k % 2 == 0) { whichLine += 3; }
+//         }
+
+//         // now go whichLine many lines down in text file and should be at category that we want
+//         std::string line;
+
+//         for (int i = 0; i < whichLine; i++) {
+//             while (getline(file1, line)) {}
+//         }
+
+//         // line.substr(1, line.size()-3) now hopefully holds the category that we want
+//         categoriesAndPuzzles.push_back(line.substr(1, line.size()-3));
+
+//         int counter = 0;
+
+//         //filling all vector<strings> with puzzles
+//         while (getline(file1, line)) {
+
+//             if (line[0] != '[') {
+//                 counter++;
+//                 if (i < NUM_ROUNDS) {
+//                     if (counter == choosePuzzle) { 
+//                         categoriesAndPuzzles.push_back(line.substr(0, line.size()-1));
+//                         break;
+//                     }
+//                 } else {
+//                     if (counter == choosePuzzle + PuzzlesPartitions[chooseCategory] + 1) {
+//                         categoriesAndPuzzles.push_back(line.substr(0, line.size()-1));
+//                         break;
+//                     }
+//                 }
+//             }      
+//         }
+//     }
+// }
 
 
 /*std::string gameinfo::getClue() {
@@ -167,5 +249,10 @@ std::string stringUsedLettersBoard() {
 
 
 // would like to do this when changing rounds (cuz the wheel does change a bit)
-const void gameinfo::setWheel() {
+void gameinfo::setWheel() const {
 }
+
+// std::vector<char> gameinfo::getUsedLettersBoard() {
+
+//         return usedLettersBoard;
+// }
